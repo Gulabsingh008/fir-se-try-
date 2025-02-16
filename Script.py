@@ -244,9 +244,11 @@ Nᴀᴍᴇ - {}"""
 
 𝗠𝗲𝘀𝘀𝗮𝗴𝗲 <b>: {}</b>"""
 
-    CAPTION = """<b>📂 ғɪʟᴇɴᴀᴍᴇ : {file_name}
+    CAPTION = """<b>📂 ғɪʟᴇɴᴀᴍᴇ : {file_name} </b>
 
-<b>⚙️ sɪᴢᴇ : {file_size}</b>""" 
+<b>⚙️ sɪᴢᴇ : {file_size}</b>
+<b> 𝖩𝗈𝗂𝗇  ➥ 「 @ITACHI24X7  」</b
+""" 
 
     IMDB_TEMPLATE_TXT = """
 <b>Query: {qurey}
