@@ -244,10 +244,8 @@ Nᴀᴍᴇ - {}"""
 
 𝗠𝗲𝘀𝘀𝗮𝗴𝗲 <b>: {}</b>"""
 
-    CAPTION = """<b>📂 ғɪʟᴇɴᴀᴍᴇ : {file_name} 
-
-⚙️ sɪᴢᴇ : {file_size}</b>
-𝖩𝗈𝗂𝗇  ➥ 「 @ITACHI24X7  
+    CAPTION = """<b>
+<a href='https://t.me/TAMIMxTJ'>📂{file_name}</a></b>
 """ 
 
     IMDB_TEMPLATE_TXT = """
