@@ -31,6 +31,11 @@ from TechVJ.bot.clients import initialize_clients
 import plugins.today  # यह लाइन bot.py में जोड़ें
 
 print("✅ today.py loaded successfully!")
+import os
+import plugins
+
+print("📂 Available Plugins:", os.listdir("plugins"))  # Debugging
+
 
 
 ppath = "plugins/*.py"
