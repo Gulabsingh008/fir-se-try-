@@ -11,6 +11,9 @@ files_collection = db[COLLECTION_NAME]  # Collection का नाम info.py �
 
 @Client.on_message(filters.command("today"))
 async def today_handler(client, message):
+    print(f"📩 Received /today command from {message.from_user.id}")  # Debugging
+    await message.reply("मैंने `/today` कमांड देख ली!")  # टेस्ट रिप्लाई
+
     user_id = message.from_user.id
     
     # यूज़र का डेटा निकालें
