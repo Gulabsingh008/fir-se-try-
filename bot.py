@@ -28,6 +28,11 @@ from TechVJ.bot import TechVJBot
 from TechVJ.util.keepalive import ping_server
 from TechVJ.bot.clients import initialize_clients
 
+import plugins.today  # यह लाइन bot.py में जोड़ें
+
+print("✅ today.py loaded successfully!")
+
+
 ppath = "plugins/*.py"
 files = glob.glob(ppath)
 TechVJBot.start()
