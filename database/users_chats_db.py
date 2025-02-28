@@ -71,15 +71,20 @@ default_setgs = {
 
 
 class Database:
-    def __init__(self, uri, database_name):
-        self._client = motor.motor_asyncio.AsyncIOMotorClient(uri)
-        self.db = self._client[database_name]
-        # ✅ सही Collections
-        self.col = self.db["users"]  # ✅ यूज़र कलेक्शन
-        self.grp = self.db["groups"]  # ✅ ग्रुप कलेक्शन
-        self.files = self.db["vjcollection"]  # ✅ फ़ाइल कलेक्शन
-        self.bot = self.db["clone_bots"]  # ✅ क्लोन बॉट डेटा
-        
+    def __init__(self):
+        self.col = users_collection  # ✅ यूज़र कलेक्शन
+        self.files = files_collection  # ✅ फ़ाइल कलेक्शन
+        self.grp = groups_collection  # ✅ ग्रुप कलेक्शन (फिक्स)
+
+    async def get_banned(self):
+        """Fetch banned users and disabled groups"""
+        users_cursor = self.col.find({'ban_status.is_banned': True})
+        chats_cursor = self.grp.find({'chat_status.is_disabled': True})
+
+        b_chats = [chat['id'] async for chat in chats_cursor]
+        b_users = [user['id'] async for user in users_cursor]
+        return b_users, b_chats
+
     def new_user(self, id, name):
         return dict(
             id = id,
@@ -184,18 +189,6 @@ class Database:
 
     async def delete_user(self, user_id):
         await self.col.delete_many({'id': int(user_id)})
-
-
-    async def get_banned(self):
-        """Fetch banned users and disabled groups"""
-        users = self.col.find({'ban_status.is_banned': True})
-        chats = self.grp.find({'chat_status.is_disabled': True})
-
-        b_chats = [chat['id'] async for chat in chats]
-        b_users = [user['id'] async for user in users]
-        return b_users, b_chats
-    
-
 
     async def add_chat(self, chat, title):
         chat = self.new_group(chat, title)
