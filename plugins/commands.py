@@ -40,7 +40,7 @@ async def start_handler(client, message):
 async def today_handler(client, message):
     user_id = message.from_user.id
 
-    # ✅ यूज़र की डेली यूसेज चेक करें
+    # ✅ MongoDB से यूज़र का डेटा लाएँ
     user_data = await collection.find_one({"id": user_id})
 
     # 🛠 अगर यूज़र नहीं है, तो उसे डेटाबेस में ऐड करें
@@ -51,8 +51,9 @@ async def today_handler(client, message):
             "premium": False  # Default: फ्री यूजर
         }
         await collection.insert_one(new_user)
-        user_data = new_user  # ✅ अब user_data null नहीं रहेगा
+        user_data = await collection.find_one({"id": user_id})  # ✅ अब दोबारा डेटा लाएँ
 
+    # ✅ अब user_data कभी `None` नहीं होगा
     daily_usage = user_data.get("daily_usage", 0)
     is_premium = user_data.get("premium", False)
 
