@@ -28,9 +28,9 @@ from TechVJ.bot import TechVJBot
 from TechVJ.util.keepalive import ping_server
 from TechVJ.bot.clients import initialize_clients
 
-import plugins.today  # यह लाइन bot.py में जोड़ें
 
-print("✅ today.py loaded successfully!")
+
+
 import os
 import plugins
 
@@ -99,11 +99,7 @@ async def start():
     bind_address = "0.0.0.0"
     await web.TCPSite(app, bind_address, PORT).start()
     await idle()
-import os
-import plugins.today  # जबरदस्ती लोड कर रहे हैं
 
-print("📂 Available Plugins:", os.listdir("plugins"))  # यह देखेंगे कि plugins फोल्डर सही से लोड हो रहा है या नहीं
-print("✅ today.py LOADED SUCCESSFULLY!")
 
 
 if __name__ == '__main__':
