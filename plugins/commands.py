@@ -20,7 +20,7 @@ logger = logging.getLogger(__name__)
 
 from pyrogram import Client, filters
 import random
-from database.__init__ import collection  # ✅ MongoDB का सही कनेक्शन लोड होगा
+from database.__init__ import col  # ✅ MongoDB का सही कनेक्शन लोड होगा
 from database.users_chats_db import db1  # ✅ db इम्पोर्ट करें
 
 # डेली लिमिट सेटिंग्स
@@ -32,7 +32,7 @@ async def start_handler(client, message):
     user_id = message.from_user.id
 
     # ✅ पहले चेक करें कि यूज़र डेटाबेस में है या नहीं (await हटा दिया)
-    user_data = collection.find_one({"id": int(user_id)})
+    user_data = col.find_one({"id": int(user_id)})
 
     # 🛠 अगर यूज़र नहीं मिला, तो उसे डेटाबेस में ऐड करें
     if not user_data:
@@ -41,7 +41,7 @@ async def start_handler(client, message):
             "daily_usage": 0,
             "premium": False  # Default: फ्री यूजर
         }
-        collection.insert_one(new_user)  # ✅ अब await की जरूरत नहीं
+        col.insert_one(new_user)  # ✅ अब await की जरूरत नहीं
         print(f"✅ User {user_id} added to database!")  # ✅ Debugging Line
 
     await message.reply("✅ आपका अकाउंट एक्टिवेट हो गया है! अब आप /today का उपयोग कर सकते हैं।")
@@ -92,7 +92,7 @@ async def today_handler(client, message):
     await db.col.update_one({"id": int(user_id)}, {"$inc": {"daily_usage": 1}})
 
     # ✅ पहले चेक करें कि MongoDB में फाइलें हैं या नहीं
-    file_cursor = list(collection.aggregate([{"$match": {"type": "file"}}, {"$sample": {"size": 1}}]))  
+    file_cursor = list(col.aggregate([{"$match": {"type": "file"}}, {"$sample": {"size": 1}}]))  
     if not file_cursor:
         await message.reply("⚠️ अभी कोई फ़ाइल उपलब्ध नहीं है!")
         return
@@ -103,7 +103,7 @@ async def today_handler(client, message):
     await client.send_document(message.chat.id, document=random_file["file_id"], caption="🎁 आपकी फ़ाइल!")
 
     # ✅ यूज़र की यूसेज अपडेट करें
-    collection.update_one({"id": int(user_id)}, {"$inc": {"daily_usage": 1}})
+    col.update_one({"id": int(user_id)}, {"$inc": {"daily_usage": 1}})
 
 
 ################################
