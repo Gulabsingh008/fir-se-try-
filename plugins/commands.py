@@ -40,12 +40,13 @@ async def start_handler(client, message):
 async def today_handler(client, message):
     user_id = message.from_user.id
 
-    # ✅ MongoDB से यूज़र का डेटा लाएँ (अब Integer में Convert करके)
+    # ✅ MongoDB से यूज़र का डेटा लाएँ
     user_data = await collection.find_one({"id": int(user_id)})  
-    print(f"🔍 DEBUG: user_data for {user_id} → {user_data}")  # ✅ Debugging Line
+    print(f"🔍 DEBUG 1: user_data for {user_id} → {user_data}")  # ✅ Debugging Line
 
     # 🛠 अगर यूज़र नहीं मिला, तो उसे डेटाबेस में ऐड करें
     if not user_data:
+        print(f"⚠️ User {user_id} not found, adding to database...")  # ✅ Debugging Line
         new_user = {
             "id": int(user_id),  # ✅ Ensure ID is Integer
             "daily_usage": 0,
@@ -56,10 +57,11 @@ async def today_handler(client, message):
 
         # ✅ अब दोबारा यूज़र का डेटा लाएँ
         user_data = await collection.find_one({"id": int(user_id)})
-        print(f"🔍 DEBUG: user_data after insert → {user_data}")  # ✅ Debugging Line
+        print(f"🔍 DEBUG 2: user_data after insert → {user_data}")  # ✅ Debugging Line
 
-    # 🛠 अगर अब भी `None` आ रहा है, तो एरर मैसेज दें
+    # 🛠 अगर अब भी `None` आ रहा है, तो एरर मैसेज दें और लॉग्स में दिखाएँ
     if not user_data:
+        print(f"❌ ERROR: User {user_id} still not found after insert!")
         await message.reply("❌ यूज़र डेटा डेटाबेस में स्टोर नहीं हो रहा!")
         return
 
@@ -86,6 +88,7 @@ async def today_handler(client, message):
 
     # ✅ यूज़र की यूसेज अपडेट करें
     await collection.update_one({"id": int(user_id)}, {"$inc": {"daily_usage": 1}})
+
 
 ################################
 @Client.on_message(filters.command("start") & filters.incoming)
