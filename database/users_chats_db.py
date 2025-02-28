@@ -318,7 +318,7 @@ class Database:
     async def get_save(self, id):
         user = await self.col.find_one({'id': int(id)})
         return user.get('save', False) 
-def __init__(self):
+    def __init__(self):
         self.col = users_collection  # ✅ यूज़र कलेक्शन
         self.files = files_collection  # ✅ फ़ाइल कलेक्शन
 
