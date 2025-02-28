@@ -63,8 +63,9 @@ async def today_handler(client, message):
         return
 
     # ✅ अब Aggregation Pipeline से रैंडम फ़ाइल निकालें
-    random_file = collection.aggregate([{"$match": {"type": "file"}}, {"$sample": {"size": 1}}]).next()
-    
+    random_file_cursor = collection.aggregate([{"$match": {"type": "file"}}, {"$sample": {"size": 1}}])
+    random_file = next(random_file_cursor, None)  # ✅ StopIteration को Handle करें
+
     if not random_file:
         await message.reply("⚠️ अभी कोई फ़ाइल उपलब्ध नहीं है!")
         return
