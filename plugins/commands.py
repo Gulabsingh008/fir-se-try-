@@ -31,10 +31,21 @@ PREMIUM_USER_LIMIT = 15
 async def start_handler(client, message):
     user_id = message.from_user.id
 
-    if not await db.is_user_exist(user_id):  # ✅ अब सही तरीके से कॉल होगा
-        await db.add_user(user_id, message.from_user.first_name)  # ✅ यूज़र ऐड करें
+    # ✅ पहले चेक करें कि यूज़र डेटाबेस में है या नहीं
+    user_data = await collection.find_one({"id": int(user_id)})
 
-    await message.reply("✅ बॉट तैयार है!")
+    # 🛠 अगर यूज़र नहीं मिला, तो उसे डेटाबेस में ऐड करें
+    if not user_data:
+        new_user = {
+            "id": int(user_id),  # ✅ Ensure ID is Integer
+            "daily_usage": 0,
+            "premium": False  # Default: फ्री यूजर
+        }
+        await collection.insert_one(new_user)  # ✅ MongoDB में नया यूज़र जोड़ें
+        print(f"✅ User {user_id} added to database!")  # ✅ Debugging Message
+
+    await message.reply("✅ आपका अकाउंट एक्टिवेट हो गया है! अब आप /today का उपयोग कर सकते हैं।")
+
 
 @Client.on_message(filters.command("today"))
 async def today_handler(client, message):
