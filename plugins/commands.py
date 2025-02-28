@@ -20,8 +20,8 @@ logger = logging.getLogger(__name__)
 
 from pyrogram import Client, filters
 import random
-from database.__init__ import collection  # ✅ MongoDB का सही कनेक्शन लोड होगा
-from database.users_chats_db import db  # ✅ db इम्पोर्ट करें
+from database.__init__ import collectionss  # ✅ MongoDB का सही कनेक्शन लोड होगा
+from database.users_chats_db import 1db  # ✅ db इम्पोर्ट करें
 
 # डेली लिमिट सेटिंग्स
 FREE_USER_LIMIT = 3
@@ -32,7 +32,7 @@ async def start_handler(client, message):
     user_id = message.from_user.id
 
     # ✅ पहले चेक करें कि यूज़र डेटाबेस में है या नहीं (await हटा दिया)
-    user_data = collection.find_one({"id": int(user_id)})
+    user_data = collectionss.find_one({"id": int(user_id)})
 
     # 🛠 अगर यूज़र नहीं मिला, तो उसे डेटाबेस में ऐड करें
     if not user_data:
@@ -41,14 +41,14 @@ async def start_handler(client, message):
             "daily_usage": 0,
             "premium": False  # Default: फ्री यूजर
         }
-        collection.insert_one(new_user)  # ✅ अब await की जरूरत नहीं
+        collectionss.insert_one(new_user)  # ✅ अब await की जरूरत नहीं
         print(f"✅ User {user_id} added to database!")  # ✅ Debugging Line
 
     await message.reply("✅ आपका अकाउंट एक्टिवेट हो गया है! अब आप /today का उपयोग कर सकते हैं।")
 @Client.on_message(filters.command("today"))
 async def today_handler(client, message):
     user_id = message.from_user.id
-    user_data = collection.find_one({"id": int(user_id)})
+    user_data = collectionss.find_one({"id": int(user_id)})
 
     if not user_data:
         await message.reply("❌ आपका अकाउंट डेटाबेस में नहीं मिला! पहले /start कमांड भेजें।")
@@ -63,25 +63,18 @@ async def today_handler(client, message):
         return
 
     # ✅ पहले चेक करें कि MongoDB में फाइलें हैं या नहीं
-    file_cursor = list(collection.aggregate([{"$match": {"type": "file"}}, {"$sample": {"size": 1}}]))  
+    file_cursor = list(collectionss.aggregate([{"$match": {"type": "file"}}, {"$sample": {"size": 1}}]))  
     if not file_cursor:
         await message.reply("⚠️ अभी कोई फ़ाइल उपलब्ध नहीं है!")
         return
 
     random_file = file_cursor[0]  # ✅ अब यह सुरक्षित है
 
-
-    if not file_list:
-        await message.reply("⚠️ अभी कोई फ़ाइल उपलब्ध नहीं है!")
-        return
-
-    random_file = file_list[0]  # ✅ अब यह सुरक्षित है
-
     # ✅ यूज़र को फ़ाइल भेजें
     await client.send_document(message.chat.id, document=random_file["file_id"], caption="🎁 आपकी फ़ाइल!")
 
     # ✅ यूज़र की यूसेज अपडेट करें
-    collection.update_one({"id": int(user_id)}, {"$inc": {"daily_usage": 1}})
+    collectionss.update_one({"id": int(user_id)}, {"$inc": {"daily_usage": 1}})
 
 
 ################################
