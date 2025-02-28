@@ -71,12 +71,9 @@ default_setgs = {
 
 
 class Database:
-    
     def __init__(self, uri, database_name):
-        def __init__(self, uri, database_name):
         self._client = motor.motor_asyncio.AsyncIOMotorClient(uri)
         self.db = self._client[database_name]
-        
         # ✅ सही Collections
         self.col = self.db["users"]  # ✅ यूज़र कलेक्शन
         self.grp = self.db["groups"]  # ✅ ग्रुप कलेक्शन
