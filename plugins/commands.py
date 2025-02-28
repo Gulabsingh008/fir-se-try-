@@ -86,6 +86,9 @@ async def start(client, message):
             parse_mode=enums.ParseMode.HTML
         )
         return
+@Client.on_message(filters.command("today"))
+async def today_handler(client, message):
+        await message.reply("✅ `/today` कमांड काम कर रही है!")
     
     if AUTH_CHANNEL and not await is_subscribed(client, message):
         try:
