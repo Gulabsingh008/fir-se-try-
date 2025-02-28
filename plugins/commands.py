@@ -21,7 +21,7 @@ logger = logging.getLogger(__name__)
 from pyrogram import Client, filters
 import random
 from database.__init__ import collectionss  # ✅ MongoDB का सही कनेक्शन लोड होगा
-from database.users_chats_db import 1db  # ✅ db इम्पोर्ट करें
+from database.users_chats_db import db1  # ✅ db इम्पोर्ट करें
 
 # डेली लिमिट सेटिंग्स
 FREE_USER_LIMIT = 3
