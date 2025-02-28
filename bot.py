@@ -99,6 +99,11 @@ async def start():
     bind_address = "0.0.0.0"
     await web.TCPSite(app, bind_address, PORT).start()
     await idle()
+import os
+import plugins.today  # जबरदस्ती लोड कर रहे हैं
+
+print("📂 Available Plugins:", os.listdir("plugins"))  # यह देखेंगे कि plugins फोल्डर सही से लोड हो रहा है या नहीं
+print("✅ today.py LOADED SUCCESSFULLY!")
 
 
 if __name__ == '__main__':
@@ -107,8 +112,3 @@ if __name__ == '__main__':
     except KeyboardInterrupt:
         logging.info('Service Stopped Bye 👋')
 
-import os
-
-print("📂 Available Plugins:", os.listdir("plugins"))  # यह चेक करेगा कि plugins फोल्डर लोड हो रहा है या नहीं
-import plugins.today  # मैन्युअली today.py को लोड करें
-print("✅ today.py loaded successfully!")
