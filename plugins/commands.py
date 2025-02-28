@@ -42,7 +42,18 @@ async def today_handler(client, message):
 
     # ✅ यूज़र की डेली यूसेज चेक करें
     user_data = await collection.find_one({"id": user_id})
-    daily_usage = user_data.get("daily_usage", 0) if user_data else 0
+
+    # 🛠 अगर यूज़र नहीं है, तो उसे डेटाबेस में ऐड करें
+    if not user_data:
+        new_user = {
+            "id": user_id,
+            "daily_usage": 0,
+            "premium": False  # Default: फ्री यूजर
+        }
+        await collection.insert_one(new_user)
+        user_data = new_user  # ✅ अब user_data null नहीं रहेगा
+
+    daily_usage = user_data.get("daily_usage", 0)
     is_premium = user_data.get("premium", False)
 
     # ✅ लिमिट सेट करें
