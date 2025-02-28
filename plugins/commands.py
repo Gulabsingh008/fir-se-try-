@@ -20,7 +20,7 @@ logger = logging.getLogger(__name__)
 
 from pyrogram import Client, filters
 import random
-from database.__init__ import collection  # ✅ यह MongoDB का सही कनेक्शन लेगा
+from database.__init__ import collection  # ✅ MongoDB का सही कनेक्शन लोड होगा
 from database.users_chats_db import db  # ✅ db इम्पोर्ट करें
 
 # डेली लिमिट सेटिंग्स
