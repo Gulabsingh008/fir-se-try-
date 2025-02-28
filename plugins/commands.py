@@ -17,7 +17,11 @@ from urllib.parse import quote_plus
 from TechVJ.util.file_properties import get_name, get_hash, get_media_file_size
 logger = logging.getLogger(__name__)
 import random
-from database import collection, FREE_USER_LIMIT, PREMIUM_USER_LIMIT  # Import किया
+from database import db
+
+collection = db["vjcollection"]  # Collection को मैन्युअली सेट करें
+FREE_USER_LIMIT = 3
+PREMIUM_USER_LIMIT = 15
 
 
 @Client.on_message(filters.command("start") & filters.incoming)
