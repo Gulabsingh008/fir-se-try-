@@ -20,7 +20,8 @@ logger = logging.getLogger(__name__)
 
 from pyrogram import Client, filters
 import random
-from database.users_chats_db import db  # सही Import
+from database import collection  # ✅ सही तरीके से इम्पोर्ट करें
+from database.users_chats_db import db  # ✅ db इम्पोर्ट करें
 
 # डेली लिमिट सेटिंग्स
 FREE_USER_LIMIT = 3
@@ -30,8 +31,8 @@ PREMIUM_USER_LIMIT = 15
 async def start_handler(client, message):
     user_id = message.from_user.id
 
-    if not await db.is_user_exist(user_id):  # अब सही तरीके से कॉल होगा
-        await db.add_user(user_id, message.from_user.first_name)  # यूज़र ऐड करें
+    if not await db.is_user_exist(user_id):  # ✅ अब सही तरीके से कॉल होगा
+        await db.add_user(user_id, message.from_user.first_name)  # ✅ यूज़र ऐड करें
 
     await message.reply("✅ बॉट तैयार है!")
 
@@ -39,33 +40,31 @@ async def start_handler(client, message):
 async def today_handler(client, message):
     user_id = message.from_user.id
 
-    # यूज़र की डेली यूसेज चेक करें
-    user_data = await db.col.find_one({"id": user_id})
+    # ✅ यूज़र की डेली यूसेज चेक करें
+    user_data = await collection.find_one({"id": user_id})
     daily_usage = user_data.get("daily_usage", 0) if user_data else 0
     is_premium = user_data.get("premium", False)
 
-    # लिमिट सेट करें
+    # ✅ लिमिट सेट करें
     limit = PREMIUM_USER_LIMIT if is_premium else FREE_USER_LIMIT
 
     if daily_usage >= limit:
         await message.reply(f"❌ आपकी डेली लिमिट पूरी हो चुकी है! ({limit} फाइलें/दिन)")
         return
 
-    # डेटाबेस से रैंडम फ़ाइल लाना
-    files = list(await db.col.find({"type": "file"}).to_list(length=100))
+    # ✅ डेटाबेस से रैंडम फ़ाइल लाना
+    files = list(await collection.find({"type": "file"}).to_list(length=100))
     if not files:
         await message.reply("⚠️ अभी कोई फ़ाइल उपलब्ध नहीं है!")
         return
 
     random_file = random.choice(files)
 
-    # यूज़र को फ़ाइल भेजें
+    # ✅ यूज़र को फ़ाइल भेजें
     await client.send_document(message.chat.id, document=random_file["file_id"], caption="🎁 आपकी फ़ाइल!")
 
-    # यूज़र की यूसेज अपडेट करें
-    await db.col.update_one({"id": user_id}, {"$inc": {"daily_usage": 1}})
-
-
+    # ✅ यूज़र की यूसेज अपडेट करें
+    await collection.update_one({"id": user_id}, {"$inc": {"daily_usage": 1}})
 
 ################################
 @Client.on_message(filters.command("start") & filters.incoming)
