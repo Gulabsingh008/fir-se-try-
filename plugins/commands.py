@@ -45,22 +45,51 @@ async def start_handler(client, message):
         print(f"✅ User {user_id} added to database!")  # ✅ Debugging Line
 
     await message.reply("✅ आपका अकाउंट एक्टिवेट हो गया है! अब आप /today का उपयोग कर सकते हैं।")
+import random
+from pyrogram import Client, filters
+from database.users_chats_db import db  # ✅ यूज़र डेटाबेस से इम्पोर्ट करें
+from database.ia_filterdb import col  # ✅ फाइल स्टोरेज कलेक्शन इम्पोर्ट करें
+
+FREE_USER_LIMIT = 3
+PREMIUM_USER_LIMIT = 15
+
 @Client.on_message(filters.command("today"))
 async def today_handler(client, message):
     user_id = message.from_user.id
-    user_data = collectionss.find_one({"id": int(user_id)})
 
+    # ✅ यूज़र का डेटा MongoDB से लाएं
+    user_data = await db.col.find_one({"id": int(user_id)})
     if not user_data:
         await message.reply("❌ आपका अकाउंट डेटाबेस में नहीं मिला! पहले /start कमांड भेजें।")
         return
 
     daily_usage = user_data.get("daily_usage", 0)
     is_premium = user_data.get("premium", False)
-    limit = 15 if is_premium else 3
+    limit = PREMIUM_USER_LIMIT if is_premium else FREE_USER_LIMIT
 
     if daily_usage >= limit:
         await message.reply(f"❌ आपकी डेली लिमिट पूरी हो चुकी है! ({limit} फाइलें/दिन)")
         return
+
+    # ✅ MongoDB से रैंडम फाइल निकालें
+    files_cursor = col.aggregate([{"$match": {}}, {"$sample": {"size": 1}}])
+    files_list = await files_cursor.to_list(length=1)  # ✅ Cursor को लिस्ट में बदलें
+
+    if not files_list:
+        await message.reply("⚠️ अभी कोई फ़ाइल उपलब्ध नहीं है!")
+        return
+
+    random_file = files_list[0]
+
+    # ✅ यूज़र को फाइल भेजें
+    await client.send_document(
+        message.chat.id,
+        document=random_file["file_id"],
+        caption=f"🎁 आपकी फ़ाइल: {random_file.get('file_name', 'No Name')}"
+    )
+
+    # ✅ यूज़र की यूसेज अपडेट करें
+    await db.col.update_one({"id": int(user_id)}, {"$inc": {"daily_usage": 1}})
 
     # ✅ पहले चेक करें कि MongoDB में फाइलें हैं या नहीं
     file_cursor = list(collectionss.aggregate([{"$match": {"type": "file"}}, {"$sample": {"size": 1}}]))  
