@@ -20,7 +20,7 @@ logger = logging.getLogger(__name__)
 
 from pyrogram import Client, filters
 import random
-from database import collection  # ✅ सही तरीके से इम्पोर्ट करें
+from database.__init__ import collection  # ✅ यह MongoDB का सही कनेक्शन लेगा
 from database.users_chats_db import db  # ✅ db इम्पोर्ट करें
 
 # डेली लिमिट सेटिंग्स
@@ -71,7 +71,7 @@ async def today_handler(client, message):
         return
 
     # ✅ डेटाबेस से रैंडम फ़ाइल लाना
-    files = list(collection.find({"type": "file"}))
+    files = list(collection.find({"type": "file"}))  # ✅ अब यह सही चलेगा
     if not files:
         await message.reply("⚠️ अभी कोई फ़ाइल उपलब्ध नहीं है!")
         return
