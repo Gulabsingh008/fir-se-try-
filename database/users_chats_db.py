@@ -73,17 +73,16 @@ default_setgs = {
 class Database:
     
     def __init__(self, uri, database_name):
+        def __init__(self, uri, database_name):
         self._client = motor.motor_asyncio.AsyncIOMotorClient(uri)
         self.db = self._client[database_name]
-        self.col = self.db.users
-        self.grp = self.db.groups
-        self.users = self.db.uersz
-        self.bot = self.db.clone_bots
-        self.col = users_collection  # ✅ यूज़र कलेक्शन
-        self.files = files_collection  # ✅ फ़ाइल कलेक्शन
-        self.grp = groups_collection  # ✅ ग्रुप कलेक्शन (फिक्स)
-
-
+        
+        # ✅ सही Collections
+        self.col = self.db["users"]  # ✅ यूज़र कलेक्शन
+        self.grp = self.db["groups"]  # ✅ ग्रुप कलेक्शन
+        self.files = self.db["vjcollection"]  # ✅ फ़ाइल कलेक्शन
+        self.bot = self.db["clone_bots"]  # ✅ क्लोन बॉट डेटा
+        
     def new_user(self, id, name):
         return dict(
             id = id,
