@@ -45,37 +45,29 @@ async def start_handler(client, message):
         print(f"✅ User {user_id} added to database!")  # ✅ Debugging Line
 
     await message.reply("✅ आपका अकाउंट एक्टिवेट हो गया है! अब आप /today का उपयोग कर सकते हैं।")
-
 @Client.on_message(filters.command("today"))
 async def today_handler(client, message):
     user_id = message.from_user.id
+    user_data = collection.find_one({"id": int(user_id)})
 
-    # ✅ MongoDB से यूज़र का डेटा लाएँ
-    user_data = collection.find_one({"id": int(user_id)})  
-    print(f"🔍 DEBUG: user_data for {user_id} → {user_data}")  # ✅ Debugging Line
-
-    # 🛠 अगर यूज़र नहीं मिला, तो एरर दिखाएँ
     if not user_data:
         await message.reply("❌ आपका अकाउंट डेटाबेस में नहीं मिला! पहले /start कमांड भेजें।")
         return
 
     daily_usage = user_data.get("daily_usage", 0)
     is_premium = user_data.get("premium", False)
-
-    # ✅ लिमिट सेट करें
-    limit = PREMIUM_USER_LIMIT if is_premium else FREE_USER_LIMIT
+    limit = 15 if is_premium else 3
 
     if daily_usage >= limit:
         await message.reply(f"❌ आपकी डेली लिमिट पूरी हो चुकी है! ({limit} फाइलें/दिन)")
         return
 
-    # ✅ डेटाबेस से सभी फ़ाइलें लाएँ और लिस्ट में बदलें
-    files = list(collection.find({"type": "file"}))  # ✅ Cursor को लिस्ट में बदलें
-    if not files:
+    # ✅ अब Aggregation Pipeline से रैंडम फ़ाइल निकालें
+    random_file = collection.aggregate([{"$match": {"type": "file"}}, {"$sample": {"size": 1}}]).next()
+    
+    if not random_file:
         await message.reply("⚠️ अभी कोई फ़ाइल उपलब्ध नहीं है!")
         return
-
-    random_file = random.choice(files)  # ✅ अब यह सही से चलेगा
 
     # ✅ यूज़र को फ़ाइल भेजें
     await client.send_document(message.chat.id, document=random_file["file_id"], caption="🎁 आपकी फ़ाइल!")
