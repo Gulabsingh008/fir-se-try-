@@ -41,7 +41,7 @@ async def today_handler(client, message):
     user_id = message.from_user.id
 
     # ✅ MongoDB से यूज़र का डेटा लाएँ
-    user_data = await collection.find_one({"id": user_id})
+    user_data = await collection.find_one({"id": int(user_id)})  # ✅ Fix: Ensure ID is Integer
     print(f"🔍 DEBUG: user_data for {user_id} → {user_data}")  # ✅ Debugging Line
 
     # 🛠 अगर यूज़र नहीं मिला, तो उसे डेटाबेस में ऐड करें
@@ -55,7 +55,7 @@ async def today_handler(client, message):
         print(f"✅ User {user_id} added to database!")  # ✅ Debugging Line
 
         # ✅ अब दोबारा यूज़र का डेटा लाएँ
-        user_data = await collection.find_one({"id": user_id})
+        user_data = await collection.find_one({"id": int(user_id)})  # ✅ Fix: Ensure ID is Integer
         print(f"🔍 DEBUG: user_data after insert → {user_data}")  # ✅ Debugging Line
 
     # 🛠 अगर अब भी `None` आ रहा है, तो एरर मैसेज दें
