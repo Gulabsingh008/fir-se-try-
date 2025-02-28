@@ -17,18 +17,27 @@ from urllib.parse import quote_plus
 from TechVJ.util.file_properties import get_name, get_hash, get_media_file_size
 logger = logging.getLogger(__name__)
 from pyrogram import Client, filters
-from pymongo import MongoClient
-from info import DATABASE_URI, DATABASE_NAME, COLLECTION_NAME  # Import from info.py
 import random
+from pymongo import MongoClient
+import os
+
+# MongoDB कनेक्शन
+DATABASE_URI = os.getenv("DATABASE_URI", "")
+DATABASE_NAME = "techvjclonefilterbot"
+COLLECTION_NAME = "vjcollection"
+
+client = MongoClient(DATABASE_URI)
+db = client[DATABASE_NAME]
+collection = db[COLLECTION_NAME]
+
+# डेली लिमिट सेटिंग्स
+FREE_USER_LIMIT = 3
+PREMIUM_USER_LIMIT = 15
 
 BATCH_FILES = {}
 join_db = JoinReqs
 
-# MongoDB से कनेक्ट करें
-mongo_client = MongoClient(DATABASE_URI)
-db = mongo_client[DATABASE_NAME]
-users_collection = db["users"]
-files_collection = db[COLLECTION_NAME]  # Collection का नाम info.py से
+
 
 
 @Client.on_message(filters.command("start") & filters.incoming)
@@ -619,41 +628,32 @@ async def start(client, message):
 @Client.on_message(filters.command("today"))
 async def today_handler(client, message):
     user_id = message.from_user.id
-    
-    # यूज़र का डेटा निकालें
-    user_data = users_collection.find_one({"user_id": user_id})
-    
-    if not user_data:
-        await message.reply("⚠️ आप रजिस्टर नहीं हैं! पहले /start दबाएँ।")
+
+    # यूज़र की डेली यूसेज चेक करें
+    user_data = collection.find_one({"user_id": user_id})
+    daily_usage = user_data.get("daily_usage", 0) if user_data else 0
+    is_premium = user_data.get("premium", False)
+
+    # लिमिट सेट करें
+    limit = PREMIUM_USER_LIMIT if is_premium else FREE_USER_LIMIT
+
+    if daily_usage >= limit:
+        await message.reply(f"❌ आपकी डेली लिमिट पूरी हो चुकी है! ({limit} फाइलें/दिन)")
         return
 
-    is_premium = user_data.get("is_premium", False)
-    daily_limit = user_data.get("daily_limit", 0)
-    max_limit = 15 if is_premium else 3  # प्रीमियम = 15, फ्री = 3
-
-    if daily_limit >= max_limit:
-        await message.reply("⚠️ आज की लिमिट समाप्त हो गई है! कृपया कल पुनः प्रयास करें।")
+    # डेटाबेस से रैंडम फ़ाइल लाना
+    files = list(collection.find({"type": "file"}))  # फाइल्स को क्वेरी करें
+    if not files:
+        await message.reply("⚠️ अभी कोई फ़ाइल उपलब्ध नहीं है!")
         return
 
-    # चेक करें कि फाइल्स उपलब्ध हैं या नहीं
-    total_files = files_collection.count_documents({})
-    if total_files == 0:
-        await message.reply("⚠️ कोई फाइल उपलब्ध नहीं है!")
-        return
+    random_file = random.choice(files)
 
-    # रैंडम फाइल भेजें
-    random_index = random.randint(0, total_files - 1)
-    random_file = files_collection.find().skip(random_index).limit(1)[0]
+    # यूज़र को फ़ाइल भेजें
+    await client.send_document(message.chat.id, document=random_file["file_id"], caption="🎁 आपकी फ़ाइल!")
 
-    if not random_file:
-        await message.reply("⚠️ कोई फाइल नहीं मिली!")
-        return
-
-    file_id = random_file["file_id"]
-    await message.reply_document(document=file_id, caption="🎁 Here is your file!")
-
-    # यूज़र की डेली लिमिट अपडेट करें
-    users_collection.update_one({"user_id": user_id}, {"$inc": {"daily_limit": 1}})
+    # यूज़र की यूसेज अपडेट करें
+    collection.update_one({"user_id": user_id}, {"$set": {"daily_usage": daily_usage + 1}}, upsert=True)
 
 @Client.on_message(filters.command('channel') & filters.user(ADMINS))
 async def channel_info(bot, message):
