@@ -12,34 +12,14 @@ import datetime
 import os
 from pymongo import MongoClient
 
-# MongoDB कनेक्शन
+# ✅ MongoDB कनेक्शन सेटअप
 DATABASE_URI = os.getenv("DATABASE_URI", "")
 DATABASE_NAME = "techvjclonefilterbot"
 
-client = MongoClient(DATABASE_URI)
+client = motor.motor_asyncio.AsyncIOMotorClient(DATABASE_URI)
 db1 = client[DATABASE_NAME]
-users_collection = db1["users"]
-
-class Database:
-    def __init__(self):
-        self.col = users_collection  # यूज़र डेटा कलेक्शन
-
-    async def is_user_exist(self, user_id):
-        """Check if user exists in the database"""
-        user = await self.col.find_one({"id": int(user_id)})
-        return bool(user)
-
-    async def add_user(self, user_id, name):
-        """Add new user to the database"""
-        user_data = {
-            "id": int(user_id),
-            "name": name,
-            "daily_usage": 0,
-            "premium": False  # डिफॉल्ट फ्री यूजर
-        }
-        await self.col.insert_one(user_data)
-
-db = Database()
+users_collection = db1["users"]  # ✅ यूज़र डेटा स्टोर होगा
+files_collection = db1["vjcollection"]  # ✅ फ़ाइल डेटा स्टोर होगा
 
 
 my_client = MongoClient(OTHER_DB_URI)
@@ -338,6 +318,52 @@ class Database:
     async def get_save(self, id):
         user = await self.col.find_one({'id': int(id)})
         return user.get('save', False) 
-    
+def __init__(self):
+        self.col = users_collection  # ✅ यूज़र कलेक्शन
+        self.files = files_collection  # ✅ फ़ाइल कलेक्शन
+
+    async def is_user_exist(self, user_id):
+        """Check if user exists in the database"""
+        user = await self.col.find_one({"id": int(user_id)})
+        return bool(user)
+
+    async def add_user(self, user_id, name):
+        """Add new user to the database"""
+        user_data = {
+            "id": int(user_id),
+            "name": name,
+            "daily_usage": 0,
+            "premium": False  # ✅ डिफ़ॉल्ट फ्री यूज़र
+        }
+        await self.col.insert_one(user_data)
+
+    async def get_user(self, user_id):
+        """Fetch user data"""
+        return await self.col.find_one({"id": int(user_id)})
+
+    async def update_usage(self, user_id):
+        """Increase daily usage count"""
+        await self.col.update_one({"id": int(user_id)}, {"$inc": {"daily_usage": 1}})
+
+    async def reset_usage(self):
+        """Reset all users' daily usage at midnight"""
+        await self.col.update_many({}, {"$set": {"daily_usage": 0}})
+
+    async def is_premium(self, user_id):
+        """Check if user is premium"""
+        user = await self.get_user(user_id)
+        return user.get("premium", False) if user else False
+
+    async def upgrade_to_premium(self, user_id):
+        """Upgrade user to premium"""
+        await self.col.update_one({"id": int(user_id)}, {"$set": {"premium": True}})
+
+    async def get_random_file(self):
+        """Fetch a random file from database"""
+        file_cursor = self.files.aggregate([{"$sample": {"size": 1}}])
+        file_list = await file_cursor.to_list(length=1)
+        return file_list[0] if file_list else None
+
+db = Database()  # अब `db` को हर जगह यूज़ कर सकते  ✅हैं
 
 db = Database(USER_DB_URI, DATABASE_NAME)
