@@ -50,13 +50,12 @@ async def start_handler(client, message):
 async def today_handler(client, message):
     user_id = message.from_user.id
 
-    # ✅ MongoDB से यूज़र का डेटा लाएँ (await हटा दिया)
+    # ✅ MongoDB से यूज़र का डेटा लाएँ
     user_data = collection.find_one({"id": int(user_id)})  
-    print(f"🔍 DEBUG 1: user_data for {user_id} → {user_data}")  # ✅ Debugging Line
+    print(f"🔍 DEBUG: user_data for {user_id} → {user_data}")  # ✅ Debugging Line
 
-    # 🛠 अगर यूज़र नहीं मिला, तो लॉग दिखाएँ
+    # 🛠 अगर यूज़र नहीं मिला, तो एरर दिखाएँ
     if not user_data:
-        print(f"⚠️ User {user_id} not found in database!")  # ✅ Debugging Line
         await message.reply("❌ आपका अकाउंट डेटाबेस में नहीं मिला! पहले /start कमांड भेजें।")
         return
 
@@ -70,20 +69,19 @@ async def today_handler(client, message):
         await message.reply(f"❌ आपकी डेली लिमिट पूरी हो चुकी है! ({limit} फाइलें/दिन)")
         return
 
-    # ✅ डेटाबेस से रैंडम फ़ाइल लाना
-    files = collection.find({"type": "file"})    # ✅ अब यह सही चलेगा
+    # ✅ डेटाबेस से सभी फ़ाइलें लाएँ और लिस्ट में बदलें
+    files = list(collection.find({"type": "file"}))  # ✅ Cursor को लिस्ट में बदलें
     if not files:
         await message.reply("⚠️ अभी कोई फ़ाइल उपलब्ध नहीं है!")
         return
 
-    random_file = random.choice(files)
+    random_file = random.choice(files)  # ✅ अब यह सही से चलेगा
 
     # ✅ यूज़र को फ़ाइल भेजें
     await client.send_document(message.chat.id, document=random_file["file_id"], caption="🎁 आपकी फ़ाइल!")
 
     # ✅ यूज़र की यूसेज अपडेट करें
     collection.update_one({"id": int(user_id)}, {"$inc": {"daily_usage": 1}})
-
 
 
 ################################
