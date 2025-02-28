@@ -671,36 +671,6 @@ async def start(client, message):
     await k.edit_text("<b>✅ ʏᴏᴜʀ ᴍᴇssᴀɢᴇ ɪs sᴜᴄᴄᴇssғᴜʟʟʏ ᴅᴇʟᴇᴛᴇᴅ ɪғ ʏᴏᴜ ᴡᴀɴᴛ ᴀɢᴀɪɴ ᴛʜᴇɴ ᴄʟɪᴄᴋ ᴏɴ ʙᴇʟᴏᴡ ʙᴜᴛᴛᴏɴ</b>",reply_markup=InlineKeyboardMarkup(btn))
     return   
 
-@Client.on_message(filters.command("today"))
-async def today_handler(client, message):
-    user_id = message.from_user.id
-
-    # यूज़र की डेली यूसेज चेक करें
-    user_data = collection.find_one({"user_id": user_id})
-    daily_usage = user_data.get("daily_usage", 0) if user_data else 0
-    is_premium = user_data.get("premium", False)
-
-    # लिमिट सेट करें
-    limit = PREMIUM_USER_LIMIT if is_premium else FREE_USER_LIMIT
-
-    if daily_usage >= limit:
-        await message.reply(f"❌ आपकी डेली लिमिट पूरी हो चुकी है! ({limit} फाइलें/दिन)")
-        return
-
-    # डेटाबेस से रैंडम फ़ाइल लाना
-    files = list(collection.find({"type": "file"}))
-    if not files:
-        await message.reply("⚠️ अभी कोई फ़ाइल उपलब्ध नहीं है!")
-        return
-
-    random_file = random.choice(files)
-
-    # यूज़र को फ़ाइल भेजें
-    await client.send_document(message.chat.id, document=random_file["file_id"], caption="🎁 आपकी फ़ाइल!")
-
-    # यूज़र की यूसेज अपडेट करें
-    collection.update_one({"user_id": user_id}, {"$set": {"daily_usage": daily_usage + 1}}, upsert=True)
-
 @Client.on_message(filters.command('channel') & filters.user(ADMINS))
 async def channel_info(bot, message):
     text = '📑 **Indexed channels/groups**\n'
