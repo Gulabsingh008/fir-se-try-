@@ -12,6 +12,13 @@ import datetime
 import os
 from pymongo import MongoClient
 
+# MongoDB कनेक्शन
+DATABASE_URI = os.getenv("DATABASE_URI", "")
+DATABASE_NAME = "techvjclonefilterbot"
+
+client = MongoClient(DATABASE_URI)
+db = client[DATABASE_NAME]
+users_collection = db["users"]
 
 class Database:
     def __init__(self):
