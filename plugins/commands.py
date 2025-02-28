@@ -71,7 +71,7 @@ async def today_handler(client, message):
         return
 
     # ✅ डेटाबेस से रैंडम फ़ाइल लाना
-    files = list(collection.find({"type": "file"}))  # ✅ अब यह सही चलेगा
+    files = collection.find({"type": "file"})    # ✅ अब यह सही चलेगा
     if not files:
         await message.reply("⚠️ अभी कोई फ़ाइल उपलब्ध नहीं है!")
         return
