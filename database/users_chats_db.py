@@ -366,4 +366,4 @@ def __init__(self):
 
 db = Database()  # अब `db` को हर जगह यूज़ कर सकते  ✅हैं
 
-db = Database(USER_DB_URI, DATABASE_NAME)
+#db = Database(USER_DB_URI, DATABASE_NAME)
