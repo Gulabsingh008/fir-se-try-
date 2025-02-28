@@ -63,12 +63,12 @@ async def today_handler(client, message):
         return
 
     # ✅ पहले चेक करें कि MongoDB में फाइलें हैं या नहीं
-   file_cursor = list(collection.aggregate([{"$match": {"type": "file"}}, {"$sample": {"size": 1}}]))  
+    file_cursor = list(collection.aggregate([{"$match": {"type": "file"}}, {"$sample": {"size": 1}}]))  
     if not file_cursor:
         await message.reply("⚠️ अभी कोई फ़ाइल उपलब्ध नहीं है!")
         return
 
-random_file = file_cursor[0]  # ✅ अब यह सुरक्षित है
+    random_file = file_cursor[0]  # ✅ अब यह सुरक्षित है
 
 
     if not file_list:
