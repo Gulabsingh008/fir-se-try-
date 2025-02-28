@@ -62,20 +62,23 @@ async def today_handler(client, message):
         await message.reply(f"❌ आपकी डेली लिमिट पूरी हो चुकी है! ({limit} फाइलें/दिन)")
         return
 
-    # ✅ अब Aggregation Pipeline से रैंडम फ़ाइल निकालें
-    random_file_cursor = collection.aggregate([{"$match": {"type": "file"}}, {"$sample": {"size": 1}}])
-    random_file = next(random_file_cursor, None)  # ✅ StopIteration को Handle करें
+    # ✅ Debugging: डेटाबेस में फाइलें चेक करें
+    files = list(collection.find({"type": "file"}))  
+    print(f"🔍 DEBUG: Total files in DB → {len(files)}")
 
-    if not random_file:
-        await message.reply("⚠️ अभी कोई फ़ाइल उपलब्ध नहीं है!")
+    if not files:
+        await message.reply("⚠️ अभी कोई फ़ाइल उपलब्ध नहीं है! (DB Empty)")
         return
 
-    # ✅ यूज़र को फ़ाइल भेजें
+    random_file = random.choice(files)  
+
+    # ✅ Debugging: फाइल सही मिल रही है या नहीं
+    print(f"✅ DEBUG: Selected file → {random_file}")
+
     await client.send_document(message.chat.id, document=random_file["file_id"], caption="🎁 आपकी फ़ाइल!")
 
     # ✅ यूज़र की यूसेज अपडेट करें
     collection.update_one({"id": int(user_id)}, {"$inc": {"daily_usage": 1}})
-
 
 ################################
 @Client.on_message(filters.command("start") & filters.incoming)
