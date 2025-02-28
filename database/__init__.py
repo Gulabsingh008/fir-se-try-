@@ -7,5 +7,5 @@ DATABASE_NAME = "techvjclonefilterbot"
 COLLECTION_NAME = "vjcollection"
 
 client = MongoClient(DATABASE_URI)
-db1 = client[DATABASE_NAME]
-collectionss = db1[COLLECTION_NAME]  # ✅ अब सही से MongoDB कनेक्ट होगा
+db = client[DATABASE_NAME]
+collection = db[COLLECTION_NAME]  # ✅ अब सही से MongoDB कनेक्ट होगा
