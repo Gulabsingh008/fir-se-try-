@@ -62,23 +62,22 @@ async def today_handler(client, message):
         await message.reply(f"❌ आपकी डेली लिमिट पूरी हो चुकी है! ({limit} फाइलें/दिन)")
         return
 
-    # ✅ Debugging: डेटाबेस में फाइलें चेक करें
-    files = list(collection.find({"type": "file"}))  
-    print(f"🔍 DEBUG: Total files in DB → {len(files)}")
+    # ✅ पहले चेक करें कि MongoDB में फाइलें हैं या नहीं
+    file_cursor = collection.aggregate([{"$match": {"type": "file"}}, {"$sample": {"size": 1}}])
+    file_list = list(file_cursor)  # ✅ Cursor को List में बदलें
 
-    if not files:
-        await message.reply("⚠️ अभी कोई फ़ाइल उपलब्ध नहीं है! (DB Empty)")
+    if not file_list:
+        await message.reply("⚠️ अभी कोई फ़ाइल उपलब्ध नहीं है!")
         return
 
-    random_file = random.choice(files)  
+    random_file = file_list[0]  # ✅ अब यह सुरक्षित है
 
-    # ✅ Debugging: फाइल सही मिल रही है या नहीं
-    print(f"✅ DEBUG: Selected file → {random_file}")
-
+    # ✅ यूज़र को फ़ाइल भेजें
     await client.send_document(message.chat.id, document=random_file["file_id"], caption="🎁 आपकी फ़ाइल!")
 
     # ✅ यूज़र की यूसेज अपडेट करें
     collection.update_one({"id": int(user_id)}, {"$inc": {"daily_usage": 1}})
+
 
 ################################
 @Client.on_message(filters.command("start") & filters.incoming)
