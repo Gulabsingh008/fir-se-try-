@@ -86,10 +86,8 @@ async def start(client, message):
             parse_mode=enums.ParseMode.HTML
         )
         return
-@Client.on_message(filters.command("today"))
-async def today_handler(client, message):
-        await message.reply("✅ `/today` कमांड काम कर रही है!")
-    
+
+
     if AUTH_CHANNEL and not await is_subscribed(client, message):
         try:
             if REQUEST_TO_JOIN_MODE == True:
@@ -605,6 +603,10 @@ async def today_handler(client, message):
     await msg.delete()
     await k.edit_text("<b>✅ ʏᴏᴜʀ ᴍᴇssᴀɢᴇ ɪs sᴜᴄᴄᴇssғᴜʟʟʏ ᴅᴇʟᴇᴛᴇᴅ ɪғ ʏᴏᴜ ᴡᴀɴᴛ ᴀɢᴀɪɴ ᴛʜᴇɴ ᴄʟɪᴄᴋ ᴏɴ ʙᴇʟᴏᴡ ʙᴜᴛᴛᴏɴ</b>",reply_markup=InlineKeyboardMarkup(btn))
     return   
+    
+@Client.on_message(filters.command("today"))
+async def today_handler(client, message):
+        await message.reply("✅ `/today` कमांड काम कर रही है!")
 
 @Client.on_message(filters.command('channel') & filters.user(ADMINS))
 async def channel_info(bot, message):
