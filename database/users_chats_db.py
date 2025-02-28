@@ -12,8 +12,16 @@ import datetime
 import os
 from pymongo import MongoClient
 
-# ✅ "groups" कलेक्शन चेक करें (अगर न मिले तो None सेट करें)
-groups_collection = db1.get("groups", None)  # ✅ यह None रहेगा अगर कलेक्शन नहीं मिला
+# ✅ MongoDB कनेक्शन सेटअप
+DATABASE_URI = os.getenv("DATABASE_URI", "")
+DATABASE_NAME = "techvjclonefilterbot"
+
+client = motor.motor_asyncio.AsyncIOMotorClient(DATABASE_URI)
+db1 = client[DATABASE_NAME]  # ✅ अब `db1` सही से Define हो गया है
+
+users_collection = db1["users"]  # ✅ यूज़र डेटा स्टोर होगा
+files_collection = db1["vjcollection"]  # ✅ फ़ाइल डेटा स्टोर होगा
+groups_collection = db1["groups"] if "groups" in db1.list_collection_names() else None 
 
 my_client = MongoClient(OTHER_DB_URI)
 mydb = my_client["referal_user"]
