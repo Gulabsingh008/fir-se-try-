@@ -9,6 +9,38 @@ from pymongo import MongoClient
 from info import DATABASE_NAME, USER_DB_URI, OTHER_DB_URI, CUSTOM_FILE_CAPTION, IMDB, IMDB_TEMPLATE, MELCOW_NEW_USERS, BUTTON_MODE, SPELL_CHECK_REPLY, PROTECT_CONTENT, AUTO_DELETE, MAX_BTN, AUTO_FFILTER, SHORTLINK_API, SHORTLINK_URL, SHORTLINK_MODE, TUTORIAL, IS_TUTORIAL
 import time
 import datetime
+import os
+from pymongo import MongoClient
+
+# MongoDB कनेक्शन
+DATABASE_URI = os.getenv("DATABASE_URI", "")
+DATABASE_NAME = "techvjclonefilterbot"
+
+client = MongoClient(DATABASE_URI)
+db = client[DATABASE_NAME]
+users_collection = db["users"]
+
+class Database:
+    def __init__(self):
+        self.col = users_collection  # यूज़र डेटा कलेक्शन
+
+    async def is_user_exist(self, user_id):
+        """Check if user exists in the database"""
+        user = await self.col.find_one({"id": int(user_id)})
+        return bool(user)
+
+    async def add_user(self, user_id, name):
+        """Add new user to the database"""
+        user_data = {
+            "id": int(user_id),
+            "name": name,
+            "daily_usage": 0,
+            "premium": False  # डिफॉल्ट फ्री यूजर
+        }
+        await self.col.insert_one(user_data)
+
+db = Database()
+
 
 my_client = MongoClient(OTHER_DB_URI)
 mydb = my_client["referal_user"]
