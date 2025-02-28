@@ -20,6 +20,7 @@ client = motor.motor_asyncio.AsyncIOMotorClient(DATABASE_URI)
 db1 = client[DATABASE_NAME]
 users_collection = db1["users"]  # ✅ यूज़र डेटा स्टोर होगा
 files_collection = db1["vjcollection"]  # ✅ फ़ाइल डेटा स्टोर होगा
+groups_collection = db1["groups"]  # ✅ ग्रुप डेटा स्टोर होगा (फिक्स)
 
 
 my_client = MongoClient(OTHER_DB_URI)
@@ -78,6 +79,9 @@ class Database:
         self.grp = self.db.groups
         self.users = self.db.uersz
         self.bot = self.db.clone_bots
+        self.col = users_collection  # ✅ यूज़र कलेक्शन
+        self.files = files_collection  # ✅ फ़ाइल कलेक्शन
+        self.grp = groups_collection  # ✅ ग्रुप कलेक्शन (फिक्स)
 
 
     def new_user(self, id, name):
@@ -187,8 +191,10 @@ class Database:
 
 
     async def get_banned(self):
+         """Fetch banned users and disabled groups"""
         users = self.col.find({'ban_status.is_banned': True})
         chats = self.grp.find({'chat_status.is_disabled': True})
+
         b_chats = [chat['id'] async for chat in chats]
         b_users = [user['id'] async for user in users]
         return b_users, b_chats
