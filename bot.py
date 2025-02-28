@@ -107,3 +107,8 @@ if __name__ == '__main__':
     except KeyboardInterrupt:
         logging.info('Service Stopped Bye 👋')
 
+import os
+
+print("📂 Available Plugins:", os.listdir("plugins"))  # यह चेक करेगा कि plugins फोल्डर लोड हो रहा है या नहीं
+import plugins.today  # मैन्युअली today.py को लोड करें
+print("✅ today.py loaded successfully!")
