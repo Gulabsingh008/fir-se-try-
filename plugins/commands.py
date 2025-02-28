@@ -16,28 +16,8 @@ from database.connections_mdb import active_connection
 from urllib.parse import quote_plus
 from TechVJ.util.file_properties import get_name, get_hash, get_media_file_size
 logger = logging.getLogger(__name__)
-from pyrogram import Client, filters
 import random
-from pymongo import MongoClient
-import os
-
-# MongoDB कनेक्शन
-DATABASE_URI = os.getenv("DATABASE_URI", "")
-DATABASE_NAME = "techvjclonefilterbot"
-COLLECTION_NAME = "vjcollection"
-
-client = MongoClient(DATABASE_URI)
-db = client[DATABASE_NAME]
-collection = db[COLLECTION_NAME]
-
-# डेली लिमिट सेटिंग्स
-FREE_USER_LIMIT = 3
-PREMIUM_USER_LIMIT = 15
-
-BATCH_FILES = {}
-join_db = JoinReqs
-
-
+from database import collection, FREE_USER_LIMIT, PREMIUM_USER_LIMIT  # Import किया
 
 
 @Client.on_message(filters.command("start") & filters.incoming)
@@ -624,7 +604,6 @@ async def start(client, message):
     await k.edit_text("<b>✅ ʏᴏᴜʀ ᴍᴇssᴀɢᴇ ɪs sᴜᴄᴄᴇssғᴜʟʟʏ ᴅᴇʟᴇᴛᴇᴅ ɪғ ʏᴏᴜ ᴡᴀɴᴛ ᴀɢᴀɪɴ ᴛʜᴇɴ ᴄʟɪᴄᴋ ᴏɴ ʙᴇʟᴏᴡ ʙᴜᴛᴛᴏɴ</b>",reply_markup=InlineKeyboardMarkup(btn))
     return   
 
-
 @Client.on_message(filters.command("today"))
 async def today_handler(client, message):
     user_id = message.from_user.id
@@ -642,7 +621,7 @@ async def today_handler(client, message):
         return
 
     # डेटाबेस से रैंडम फ़ाइल लाना
-    files = list(collection.find({"type": "file"}))  # फाइल्स को क्वेरी करें
+    files = list(collection.find({"type": "file"}))
     if not files:
         await message.reply("⚠️ अभी कोई फ़ाइल उपलब्ध नहीं है!")
         return
