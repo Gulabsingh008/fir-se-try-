@@ -42,18 +42,27 @@ async def today_handler(client, message):
 
     # ✅ MongoDB से यूज़र का डेटा लाएँ
     user_data = await collection.find_one({"id": user_id})
+    print(f"🔍 DEBUG: user_data for {user_id} → {user_data}")  # ✅ Debugging Line
 
-    # 🛠 अगर यूज़र नहीं है, तो उसे डेटाबेस में ऐड करें
+    # 🛠 अगर यूज़र नहीं मिला, तो उसे डेटाबेस में ऐड करें
     if not user_data:
         new_user = {
-            "id": user_id,
+            "id": int(user_id),  # ✅ Ensure ID is Integer
             "daily_usage": 0,
-            "premium": False  # Default: फ्री यूजर
+            "premium": False
         }
         await collection.insert_one(new_user)
-        user_data = await collection.find_one({"id": user_id})  # ✅ अब दोबारा डेटा लाएँ
+        print(f"✅ User {user_id} added to database!")  # ✅ Debugging Line
 
-    # ✅ अब user_data कभी `None` नहीं होगा
+        # ✅ अब दोबारा यूज़र का डेटा लाएँ
+        user_data = await collection.find_one({"id": user_id})
+        print(f"🔍 DEBUG: user_data after insert → {user_data}")  # ✅ Debugging Line
+
+    # 🛠 अगर अब भी `None` आ रहा है, तो एरर मैसेज दें
+    if not user_data:
+        await message.reply("❌ यूज़र डेटा डेटाबेस में स्टोर नहीं हो रहा!")
+        return
+
     daily_usage = user_data.get("daily_usage", 0)
     is_premium = user_data.get("premium", False)
 
@@ -77,6 +86,7 @@ async def today_handler(client, message):
 
     # ✅ यूज़र की यूसेज अपडेट करें
     await collection.update_one({"id": user_id}, {"$inc": {"daily_usage": 1}})
+": 1}})
 
 ################################
 @Client.on_message(filters.command("start") & filters.incoming)
