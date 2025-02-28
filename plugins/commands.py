@@ -18,6 +18,10 @@ from TechVJ.util.file_properties import get_name, get_hash, get_media_file_size
 logger = logging.getLogger(__name__)
 import random
 from database import db
+from database.users_chats_db import is_user_exist  # सही import
+
+if not await is_user_exist(message.from_user.id):
+
 
 collection = db["vjcollection"]  # Collection को मैन्युअली सेट करें
 FREE_USER_LIMIT = 3
