@@ -12,16 +12,8 @@ import datetime
 import os
 from pymongo import MongoClient
 
-# ✅ MongoDB कनेक्शन सेटअप
-DATABASE_URI = os.getenv("DATABASE_URI", "")
-DATABASE_NAME = "techvjclonefilterbot"
-
-client = motor.motor_asyncio.AsyncIOMotorClient(DATABASE_URI)
-db1 = client[DATABASE_NAME]
-users_collection = db1["users"]  # ✅ यूज़र डेटा स्टोर होगा
-files_collection = db1["vjcollection"]  # ✅ फ़ाइल डेटा स्टोर होगा
-groups_collection = db1["groups"]  # ✅ ग्रुप डेटा स्टोर होगा (फिक्स)
-
+# ✅ "groups" कलेक्शन चेक करें (अगर न मिले तो None सेट करें)
+groups_collection = db1.get("groups", None)  # ✅ यह None रहेगा अगर कलेक्शन नहीं मिला
 
 my_client = MongoClient(OTHER_DB_URI)
 mydb = my_client["referal_user"]
@@ -68,21 +60,23 @@ default_setgs = {
     'tutorial': TUTORIAL,
     'is_tutorial': IS_TUTORIAL
 }
-
-
 class Database:
     def __init__(self):
         self.col = users_collection  # ✅ यूज़र कलेक्शन
         self.files = files_collection  # ✅ फ़ाइल कलेक्शन
-        self.grp = groups_collection  # ✅ ग्रुप कलेक्शन (फिक्स)
+        self.grp = groups_collection  # ✅ ग्रुप कलेक्शन (Optional)
 
     async def get_banned(self):
         """Fetch banned users and disabled groups"""
         users_cursor = self.col.find({'ban_status.is_banned': True})
-        chats_cursor = self.grp.find({'chat_status.is_disabled': True})
-
-        b_chats = [chat['id'] async for chat in chats_cursor]
         b_users = [user['id'] async for user in users_cursor]
+
+        if self.grp:  # ✅ "groups" कलेक्शन मौजूद होने पर ही प्रोसेस करें
+            chats_cursor = self.grp.find({'chat_status.is_disabled': True})
+            b_chats = [chat['id'] async for chat in chats_cursor]
+        else:
+            b_chats = []  # ✅ अगर "groups" कलेक्शन नहीं है, तो खाली लिस्ट सेट करें
+
         return b_users, b_chats
 
     def new_user(self, id, name):
