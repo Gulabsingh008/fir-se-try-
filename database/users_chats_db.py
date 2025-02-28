@@ -191,7 +191,7 @@ class Database:
 
 
     async def get_banned(self):
-         """Fetch banned users and disabled groups"""
+        """Fetch banned users and disabled groups"""
         users = self.col.find({'ban_status.is_banned': True})
         chats = self.grp.find({'chat_status.is_disabled': True})
 
