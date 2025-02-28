@@ -8,4 +8,4 @@ COLLECTION_NAME = "vjcollection"
 
 client = MongoClient(DATABASE_URI)
 db = client[DATABASE_NAME]
-collection = db[COLLECTION_NAME]
+collection = db[COLLECTION_NAME]  # ✅ अब collection यहां पर सेट हो गया है
