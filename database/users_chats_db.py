@@ -17,8 +17,8 @@ DATABASE_URI = os.getenv("DATABASE_URI", "")
 DATABASE_NAME = "techvjclonefilterbot"
 
 client = MongoClient(DATABASE_URI)
-1db = client[DATABASE_NAME]
-users_collection = db["users"]
+db1 = client[DATABASE_NAME]
+users_collection = db1["users"]
 
 class Database:
     def __init__(self):
